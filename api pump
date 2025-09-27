@@ -1,0 +1,66 @@
+import matplotlib.pyplot as plt
+
+# دیتابیس کامل نمونه API 610
+pumps = [
+    {"type":"OH1","min_flow":10,"max_flow":200,"min_head":20,"max_head":150,"max_pressure":20,"fluids":["Water","Oil"],"temp_range":(-10,120)},
+    {"type":"OH2","min_flow":50,"max_flow":500,"min_head":30,"max_head":200,"max_pressure":25,"fluids":["Water","Oil","Chemical"],"temp_range":(0,150)},
+    {"type":"OH3","min_flow":100,"max_flow":1000,"min_head":50,"max_head":300,"max_pressure":30,"fluids":["Water","Oil"],"temp_range":(10,180)},
+    {"type":"OH4","min_flow":200,"max_flow":2000,"min_head":100,"max_head":400,"max_pressure":35,"fluids":["Water","Oil","Chemical"],"temp_range":(20,200)},
+    {"type":"OH5","min_flow":300,"max_flow":3000,"min_head":150,"max_head":500,"max_pressure":40,"fluids":["Water","Oil"],"temp_range":(30,220)},
+    {"type":"OH6","min_flow":400,"max_flow":4000,"min_head":200,"max_head":600,"max_pressure":45,"fluids":["Water","Oil","Chemical"],"temp_range":(40,250)},
+    {"type":"BB1","min_flow":500,"max_flow":5000,"min_head":100,"max_head":300,"max_pressure":50,"fluids":["Water","Oil"],"temp_range":(50,260)},
+    {"type":"BB2","min_flow":600,"max_flow":6000,"min_head":150,"max_head":400,"max_pressure":55,"fluids":["Water","Oil","Chemical"],"temp_range":(60,270)},
+    {"type":"BB3","min_flow":700,"max_flow":7000,"min_head":200,"max_head":500,"max_pressure":60,"fluids":["Water","Oil"],"temp_range":(70,280)},
+    {"type":"BB4","min_flow":800,"max_flow":8000,"min_head":250,"max_head":600,"max_pressure":65,"fluids":["Water","Oil","Chemical"],"temp_range":(80,290)},
+    {"type":"BB5","min_flow":900,"max_flow":9000,"min_head":300,"max_head":700,"max_pressure":70,"fluids":["Water","Oil"],"temp_range":(90,300)},
+    {"type":"VS1","min_flow":1000,"max_flow":10000,"min_head":100,"max_head":300,"max_pressure":75,"fluids":["Water","Oil"],"temp_range":(100,310)},
+    {"type":"VS2","min_flow":1100,"max_flow":11000,"min_head":150,"max_head":400,"max_pressure":80,"fluids":["Water","Oil","Chemical"],"temp_range":(110,320)},
+    {"type":"VS3","min_flow":1200,"max_flow":12000,"min_head":200,"max_head":500,"max_pressure":85,"fluids":["Water","Oil"],"temp_range":(120,330)},
+    {"type":"VS4","min_flow":1300,"max_flow":13000,"min_head":250,"max_head":600,"max_pressure":90,"fluids":["Water","Oil","Chemical"],"temp_range":(130,340)},
+    {"type":"VS5","min_flow":1400,"max_flow":14000,"min_head":300,"max_head":700,"max_pressure":95,"fluids":["Water","Oil"],"temp_range":(140,350)},
+    {"type":"VS6","min_flow":1500,"max_flow":15000,"min_head":350,"max_head":800,"max_pressure":100,"fluids":["Water","Oil","Chemical"],"temp_range":(150,360)},
+    {"type":"VS7","min_flow":1600,"max_flow":16000,"min_head":400,"max_head":900,"max_pressure":105,"fluids":["Water","Oil"],"temp_range":(160,370)}
+]
+
+# ورودی کاربر
+flow = float(input("دبی مورد نظر (m3/h): "))
+head = float(input("هد مورد نظر (m): "))
+fluid = input("نوع سیال (Water, Oil, Chemical): ")
+temp = float(input("دمای کاری سیال (°C): "))
+
+# یافتن پمپ‌های مناسب با فیلتر سیال و دما
+suitable_pumps = []
+for pump in pumps:
+    if (pump["min_flow"] <= flow <= pump["max_flow"] and
+        pump["min_head"] <= head <= pump["max_head"] and
+        fluid in pump["fluids"] and
+        pump["temp_range"][0] <= temp <= pump["temp_range"][1]):
+        suitable_pumps.append(pump)
+
+# رسم نمودار H-Q
+plt.figure(figsize=(14,7))
+for pump in pumps:
+    flows = [pump["min_flow"], pump["max_flow"]]
+    heads = [pump["max_head"], pump["min_head"]]
+    color = 'blue' if pump in suitable_pumps else 'gray'
+    plt.plot(flows, heads, label=f"{pump['type']}", color=color, linewidth=2 if pump in suitable_pumps else 1, alpha=0.7)
+
+# نقطه عملیاتی کاربر
+plt.scatter(flow, head, color='red', s=120, label='Operating Point', zorder=5)
+
+# تنظیمات نمودار
+plt.title("API 610 Pump H-Q Curves with Operating Point")
+plt.xlabel("Flow (m³/h)")
+plt.ylabel("Head (m)")
+plt.grid(True)
+plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.tight_layout()
+plt.show()
+
+# نمایش پمپ‌های مناسب
+if suitable_pumps:
+    print("\n✅ پمپ‌های مناسب:")
+    for pump in suitable_pumps:
+        print(f"- {pump['type']} | هد: {pump['min_head']}-{pump['max_head']} m | دبی: {pump['min_flow']}-{pump['max_flow']} m³/h | فشار max: {pump['max_pressure']} bar | سیال: {', '.join(pump['fluids'])} | دما: {pump['temp_range'][0]}-{pump['temp_range'][1]} °C")
+else:
+    print("❌ هیچ پمپ مناسب با مشخصات وارد شده یافت نشد.")
