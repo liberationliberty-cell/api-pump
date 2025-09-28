@@ -1,66 +1,193 @@
 import matplotlib.pyplot as plt
+import numpy as np
 
-# دیتابیس کامل نمونه API 610
+# ----------------------------
+# دیتابیس پمپ‌های API 610 (نمونه)
+# مقادیر عددی (min/max flow: m3/h, min/max head: m)
+# برای استفاده صنعتی بهتر این مقادیر را با داده‌های سازنده جایگزین کن
+# ----------------------------
 pumps = [
-    {"type":"OH1","min_flow":10,"max_flow":200,"min_head":20,"max_head":150,"max_pressure":20,"fluids":["Water","Oil"],"temp_range":(-10,120)},
-    {"type":"OH2","min_flow":50,"max_flow":500,"min_head":30,"max_head":200,"max_pressure":25,"fluids":["Water","Oil","Chemical"],"temp_range":(0,150)},
-    {"type":"OH3","min_flow":100,"max_flow":1000,"min_head":50,"max_head":300,"max_pressure":30,"fluids":["Water","Oil"],"temp_range":(10,180)},
-    {"type":"OH4","min_flow":200,"max_flow":2000,"min_head":100,"max_head":400,"max_pressure":35,"fluids":["Water","Oil","Chemical"],"temp_range":(20,200)},
-    {"type":"OH5","min_flow":300,"max_flow":3000,"min_head":150,"max_head":500,"max_pressure":40,"fluids":["Water","Oil"],"temp_range":(30,220)},
-    {"type":"OH6","min_flow":400,"max_flow":4000,"min_head":200,"max_head":600,"max_pressure":45,"fluids":["Water","Oil","Chemical"],"temp_range":(40,250)},
-    {"type":"BB1","min_flow":500,"max_flow":5000,"min_head":100,"max_head":300,"max_pressure":50,"fluids":["Water","Oil"],"temp_range":(50,260)},
-    {"type":"BB2","min_flow":600,"max_flow":6000,"min_head":150,"max_head":400,"max_pressure":55,"fluids":["Water","Oil","Chemical"],"temp_range":(60,270)},
-    {"type":"BB3","min_flow":700,"max_flow":7000,"min_head":200,"max_head":500,"max_pressure":60,"fluids":["Water","Oil"],"temp_range":(70,280)},
-    {"type":"BB4","min_flow":800,"max_flow":8000,"min_head":250,"max_head":600,"max_pressure":65,"fluids":["Water","Oil","Chemical"],"temp_range":(80,290)},
-    {"type":"BB5","min_flow":900,"max_flow":9000,"min_head":300,"max_head":700,"max_pressure":70,"fluids":["Water","Oil"],"temp_range":(90,300)},
-    {"type":"VS1","min_flow":1000,"max_flow":10000,"min_head":100,"max_head":300,"max_pressure":75,"fluids":["Water","Oil"],"temp_range":(100,310)},
-    {"type":"VS2","min_flow":1100,"max_flow":11000,"min_head":150,"max_head":400,"max_pressure":80,"fluids":["Water","Oil","Chemical"],"temp_range":(110,320)},
-    {"type":"VS3","min_flow":1200,"max_flow":12000,"min_head":200,"max_head":500,"max_pressure":85,"fluids":["Water","Oil"],"temp_range":(120,330)},
-    {"type":"VS4","min_flow":1300,"max_flow":13000,"min_head":250,"max_head":600,"max_pressure":90,"fluids":["Water","Oil","Chemical"],"temp_range":(130,340)},
-    {"type":"VS5","min_flow":1400,"max_flow":14000,"min_head":300,"max_head":700,"max_pressure":95,"fluids":["Water","Oil"],"temp_range":(140,350)},
-    {"type":"VS6","min_flow":1500,"max_flow":15000,"min_head":350,"max_head":800,"max_pressure":100,"fluids":["Water","Oil","Chemical"],"temp_range":(150,360)},
-    {"type":"VS7","min_flow":1600,"max_flow":16000,"min_head":400,"max_head":900,"max_pressure":105,"fluids":["Water","Oil"],"temp_range":(160,370)}
+    {"type":"OH1","min_flow":10,   "max_flow":200,   "min_head":20,  "max_head":150,"max_pressure":20,"fluids":["Water","Oil"],"temp_range":(-10,120)},
+    {"type":"OH2","min_flow":50,   "max_flow":500,   "min_head":30,  "max_head":200,"max_pressure":25,"fluids":["Water","Oil","Chemical"],"temp_range":(0,150)},
+    {"type":"OH3","min_flow":100,  "max_flow":1000,  "min_head":50,  "max_head":300,"max_pressure":30,"fluids":["Water","Oil"],"temp_range":(10,180)},
+    {"type":"OH4","min_flow":200,  "max_flow":2000,  "min_head":100, "max_head":400,"max_pressure":35,"fluids":["Water","Oil","Chemical"],"temp_range":(20,200)},
+    {"type":"OH5","min_flow":300,  "max_flow":3000,  "min_head":150, "max_head":500,"max_pressure":40,"fluids":["Water","Oil"],"temp_range":(30,220)},
+    {"type":"OH6","min_flow":400,  "max_flow":4000,  "min_head":200, "max_head":600,"max_pressure":45,"fluids":["Water","Oil","Chemical"],"temp_range":(40,250)},
+    {"type":"BB1","min_flow":500,  "max_flow":5000,  "min_head":100, "max_head":300,"max_pressure":50,"fluids":["Water","Oil"],"temp_range":(50,260)},
+    {"type":"BB2","min_flow":600,  "max_flow":6000,  "min_head":150, "max_head":400,"max_pressure":55,"fluids":["Water","Oil","Chemical"],"temp_range":(60,270)},
+    {"type":"BB3","min_flow":700,  "max_flow":7000,  "min_head":200, "max_head":500,"max_pressure":60,"fluids":["Water","Oil"],"temp_range":(70,280)},
+    {"type":"BB4","min_flow":800,  "max_flow":8000,  "min_head":250, "max_head":600,"max_pressure":65,"fluids":["Water","Oil","Chemical"],"temp_range":(80,290)},
+    {"type":"BB5","min_flow":900,  "max_flow":9000,  "min_head":300, "max_head":700,"max_pressure":70,"fluids":["Water","Oil"],"temp_range":(90,300)},
+    {"type":"VS1","min_flow":1000, "max_flow":10000, "min_head":100, "max_head":300,"max_pressure":75,"fluids":["Water","Oil"],"temp_range":(100,310)},
+    {"type":"VS2","min_flow":1100, "max_flow":11000, "min_head":150, "max_head":400,"max_pressure":80,"fluids":["Water","Oil","Chemical"],"temp_range":(110,320)},
+    {"type":"VS3","min_flow":1200, "max_flow":12000, "min_head":200, "max_head":500,"max_pressure":85,"fluids":["Water","Oil"],"temp_range":(120,330)},
+    {"type":"VS4","min_flow":1300, "max_flow":13000, "min_head":250, "max_head":600,"max_pressure":90,"fluids":["Water","Oil","Chemical"],"temp_range":(130,340)},
+    {"type":"VS5","min_flow":1400, "max_flow":14000, "min_head":300, "max_head":700,"max_pressure":95,"fluids":["Water","Oil"],"temp_range":(140,350)},
+    {"type":"VS6","min_flow":1500, "max_flow":15000, "min_head":350, "max_head":800,"max_pressure":100,"fluids":["Water","Oil","Chemical"],"temp_range":(150,360)},
+    {"type":"VS7","min_flow":1600, "max_flow":16000, "min_head":400, "max_head":900,"max_pressure":105,"fluids":["Water","Oil"],"temp_range":(160,370)}
 ]
 
-# ورودی کاربر
-flow = float(input("دبی مورد نظر (m3/h): "))
-head = float(input("هد مورد نظر (m): "))
-fluid = input("نوع سیال (Water, Oil, Chemical): ")
-temp = float(input("دمای کاری سیال (°C): "))
+# ----------------------------
+# پارامترهای راندمان متغیر
+# - eta_max براساس خانواده پمپ تعیین می‌شود (پیش‌فرض‌های صنعتی تقریبی)
+# - BEP_flow = 0.7 * max_flow (قابل تغییر)
+# - eta_min مقدار راندمان در لبه‌های بازه (حداقل)
+# ----------------------------
+eta_family = {
+    "OH": 0.78,   # اورهنگ
+    "BB": 0.82,   # between bearings
+    "VS": 0.80    # vertical suspend / submerged family
+}
+eta_min = 0.45  # راندمان در لبه‌ها (قابل تنظیم)
 
-# یافتن پمپ‌های مناسب با فیلتر سیال و دما
-suitable_pumps = []
+# کمک‌تابع: گرفتن خانواده از رشته type (مثلاً "OH2" -> "OH")
+def family_of(type_str):
+    return ''.join([c for c in type_str if not c.isdigit()])
+
+# ----------------------------
+# ورودی از کاربر
+# ----------------------------
+try:
+    flow = float(input("دبی مورد نظر (m3/h): "))
+    head = float(input("هد مورد نظر (m): "))
+    fluid = input("نوع سیال (Water, Oil, Chemical): ").strip().title()
+    temp = float(input("دمای کاری سیال (°C): "))
+except Exception as e:
+    print("ورودی نامعتبر—لطفاً مقادیر درست وارد کنید.")
+    raise
+
+# چگالی تقریبی بر حسب نوع سیال (kg/m3)
+densities = {"Water": 1000.0, "Oil": 850.0, "Chemical": 900.0}
+rho = densities.get(fluid, 1000.0)
+
+# ----------------------------
+# محاسبه BEP و منحنی راندمان برای هر پمپ
+# ----------------------------
+for pump in pumps:
+    Qmax = pump["max_flow"]
+    Qmin = pump["min_flow"]
+    # BEP: فرض 70% از Qmax (می‌تونی این ضریب رو تغییر بدی)
+    pump["Q_bep"] = 0.7 * Qmax
+    pump["H_bep"] = (pump["min_head"] + pump["max_head"]) / 2  # تقریب
+    # eta_max براساس خانواده
+    fam = family_of(pump["type"])
+    pump["eta_max"] = eta_family.get(fam, 0.78)
+    # ضریب k طوری تعیین می‌شود که در Qmax (لبه) راندمان = eta_min
+    Qb = pump["Q_bep"]
+    # اگر Qmax==Qb ضریب را طوری تعیین کن که از افت جلوگیری شود (پیش‌فرض کوچک)
+    denom = (pump["max_flow"] - Qb)**2 if (pump["max_flow"] - Qb) != 0 else 1.0
+    pump["k"] = (pump["eta_max"] - eta_min) / denom
+
+# ----------------------------
+# فیلتر پمپ‌های مناسب (هد، دبی، سیال، دما)
+# ----------------------------
+suitable = []
 for pump in pumps:
     if (pump["min_flow"] <= flow <= pump["max_flow"] and
         pump["min_head"] <= head <= pump["max_head"] and
         fluid in pump["fluids"] and
         pump["temp_range"][0] <= temp <= pump["temp_range"][1]):
-        suitable_pumps.append(pump)
+        suitable.append(pump)
 
-# رسم نمودار H-Q
-plt.figure(figsize=(14,7))
-for pump in pumps:
-    flows = [pump["min_flow"], pump["max_flow"]]
-    heads = [pump["max_head"], pump["min_head"]]
-    color = 'blue' if pump in suitable_pumps else 'gray'
-    plt.plot(flows, heads, label=f"{pump['type']}", color=color, linewidth=2 if pump in suitable_pumps else 1, alpha=0.7)
+# ----------------------------
+# رسم نمودار H-Q و نمایش BEP و Operating point
+# ----------------------------
+plt.figure(figsize=(14, 8))
+cmap = plt.cm.get_cmap('tab20', len(pumps))
+
+for i, pump in enumerate(pumps):
+    # منحنی H-Q خطی فرضی (برای نمایش) — در واقعیت منحنی غیرخطی است و از دیتای سازنده باید گرفت
+    flows = np.linspace(pump["min_flow"], pump["max_flow"], 200)
+    heads = np.linspace(pump["max_head"], pump["min_head"], 200)  # هد معمولاً با افزایش دبی کاهش می‌یابد
+
+    # منحنی راندمان (پارابولا حول BEP)
+    Qb = pump["Q_bep"]
+    eta_max = pump["eta_max"]
+    k = pump["k"]
+    etas = eta_max - k * (flows - Qb)**2
+    # محدودیت 0..1
+    etas = np.clip(etas, 0.0, 0.99)
+
+    color = cmap(i)
+    linewidth = 2.5 if pump in suitable else 1.0
+    alpha = 1.0 if pump in suitable else 0.6
+
+    # H-Q
+    plt.plot(flows, heads, label=f"{pump['type']}", color=color, linewidth=linewidth, alpha=alpha)
+
+    # نمایش BEP
+    plt.scatter(pump["Q_bep"], pump["H_bep"], marker='*', color=color, edgecolor='k', s=140, zorder=4)
+    plt.text(pump["Q_bep"], pump["H_bep"], f" BEP {pump['type']}", fontsize=8, verticalalignment='bottom', color=color)
 
 # نقطه عملیاتی کاربر
-plt.scatter(flow, head, color='red', s=120, label='Operating Point', zorder=5)
+plt.scatter(flow, head, color='red', s=160, label='Operating Point', zorder=6, edgecolor='k')
 
-# تنظیمات نمودار
-plt.title("API 610 Pump H-Q Curves with Operating Point")
+plt.title("API 610 — H-Q Curves  (BEP: * )  — Operating point (red)")
 plt.xlabel("Flow (m³/h)")
 plt.ylabel("Head (m)")
 plt.grid(True)
-plt.legend(bbox_to_anchor=(1.05, 1), loc='upper left')
+plt.legend(bbox_to_anchor=(1.02, 1), loc='upper left', ncol=1, fontsize=8)
 plt.tight_layout()
+
+# ----------------------------
+# subplot: نمایش منحنی راندمان برای پمپ‌های مناسب (اگر وجود داشته باشند)
+# ----------------------------
+if suitable:
+    fig2, ax2 = plt.subplots(figsize=(8,4))
+    for pump in suitable:
+        flows = np.linspace(pump["min_flow"], pump["max_flow"], 200)
+        Qb = pump["Q_bep"]
+        eta_max = pump["eta_max"]
+        k = pump["k"]
+        etas = eta_max - k * (flows - Qb)**2
+        etas = np.clip(etas, 0.0, 0.99)
+        ax2.plot(flows, etas*100, label=f"{pump['type']} (ηmax={eta_max*100:.0f}%)")
+        # نشانگر BEP و نقطه عملیاتی و راندمان در OP
+        ax2.scatter(pump["Q_bep"], (eta_max - k*(pump["Q_bep"]-Qb)**2)*100, marker='*', s=140, color='green', edgecolor='k')
+    # راندمان در نقطه عملیاتی برای هر suitable پمپ به صورت annotation
+    for pump in suitable:
+        # محاسبه راندمان در OP
+        Qop = flow
+        eta_op = pump["eta_max"] - pump["k"] * (Qop - pump["Q_bep"])**2
+        eta_op = float(np.clip(eta_op, 0.0, 0.99))
+        ax2.scatter(Qop, eta_op*100, color='red', s=80, edgecolor='k')
+        ax2.annotate(f"{pump['type']} OP η={eta_op*100:.1f}%", xy=(Qop, eta_op*100),
+                     xytext=(5,-15), textcoords='offset points', fontsize=8, color='red')
+
+    ax2.set_title("Efficiency vs Flow for Suitable Pumps")
+    ax2.set_xlabel("Flow (m³/h)")
+    ax2.set_ylabel("Efficiency (%)")
+    ax2.grid(True)
+    ax2.legend(fontsize=8)
+    plt.tight_layout()
+else:
+    fig2 = None
+
 plt.show()
 
-# نمایش پمپ‌های مناسب
-if suitable_pumps:
-    print("\n✅ پمپ‌های مناسب:")
-    for pump in suitable_pumps:
-        print(f"- {pump['type']} | هد: {pump['min_head']}-{pump['max_head']} m | دبی: {pump['min_flow']}-{pump['max_flow']} m³/h | فشار max: {pump['max_pressure']} bar | سیال: {', '.join(pump['fluids'])} | دما: {pump['temp_range'][0]}-{pump['temp_range'][1]} °C")
+# ----------------------------
+# محاسبه توان (P) در نقطه عملیاتی برای پمپ‌های مناسب و چاپ نتایج
+# P (kW) = rho * g * Q(m3/s) * H(m) / (eta)
+# ----------------------------
+print("\n------------------ نتایج انتخاب پمپ ------------------")
+if suitable:
+    for pump in suitable:
+        Q_m3s = flow / 3600.0
+        H = head
+        eta_op = pump["eta_max"] - pump["k"] * (flow - pump["Q_bep"])**2
+        eta_op = float(np.clip(eta_op, 0.01, 0.99))  # جلوگیری از تقسیم بر صفر
+        P_kW = (rho * 9.81 * Q_m3s * H) / (eta_op * 1000.0)
+        print(f"\n✔ {pump['type']}:")
+        print(f"  - محدوده دبی: {pump['min_flow']} - {pump['max_flow']} m³/h")
+        print(f"  - محدوده هد: {pump['min_head']} - {pump['max_head']} m")
+        print(f"  - BEP (Q,H): ({pump['Q_bep']:.1f} m³/h, {pump['H_bep']:.1f} m)")
+        print(f"  - η_max ≈ {pump['eta_max']*100:.1f}%")
+        print(f"  - η در نقطه عملیاتی ≈ {eta_op*100:.1f}%")
+        print(f"  - توان مورد نیاز در OP ≈ {P_kW:.2f} kW")
+        print(f"  - فشار کاری ماکزیمم (تقریبی): {pump['max_pressure']} bar")
+        print(f"  - سیالات مجاز: {', '.join(pump['fluids'])}")
+        print(f"  - محدوده دما: {pump['temp_range'][0]} - {pump['temp_range'][1]} °C")
 else:
-    print("❌ هیچ پمپ مناسب با مشخصات وارد شده یافت نشد.")
+    print("❌ هیچ پمپ مناسبی پیدا نشد برای مشخصات وارد شده.")
+
+print("\n(تذکر) مقادیر دیتابیس نمونه‌اند — برای طراحی صنعتی مقدارهای سازنده را جایگزین کنید.")
